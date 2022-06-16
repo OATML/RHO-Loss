@@ -1,0 +1,27 @@
+# @package _global_
+defaults:
+  - override /model/large_model: cifar_resnet.yaml
+  - override /datamodule: cifar10_datamodule.yaml
+  - override /irreducible_loss_generator: irreducible_loss_model.yaml
+  - override /datamodule/trainset_corruption: label_noise.yaml 
+
+irreducible_loss_generator:
+  checkpoint_path: "/auto/users/muhzak/goldi_checkpoints/cifar10_epoch007.ckpt"
+
+model:
+  percent_train: 0.1
+
+trainer:
+  max_epochs: 125
+  gpus: 1
+
+datamodule:
+  data_dir: "/scratch-ssd/goldiprox/data/"
+  batch_size: 320
+
+eval_set: test
+
+logger:
+  wandb:
+    project: "label_noise"
+    entity: "goldiprox"

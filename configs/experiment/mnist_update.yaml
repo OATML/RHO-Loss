@@ -1,0 +1,43 @@
+# @package _global_
+defaults:
+  - override /model/large_model: mnist_mlp512
+  - override /datamodule: qmnist_datamodule.yaml
+  - override /logger: wandb
+  - override /irreducible_loss_generator: irreducible_loss_model
+  - override /optimizer: adamw
+  - override /selection_method: reducible_loss_selection # needs to be overriden
+  - override /callbacks: val_loss
+  - override /datamodule/trainset_corruption: label_noise.yaml 
+
+irreducible_loss_generator:
+  checkpoint_path: "/auto/users/muhzak/goldiprox-hydra/logs/multiruns/2021-11-21_15-51-08/0/checkpoints/epoch_007.ckpt" #128
+#   checkpoint_path: "/auto/users/muhzak/goldiprox-hydra/logs/runs/2022-01-21/04-19-48/checkpoints/epoch_004.ckpt" #512
+
+datamodule:
+  batch_size: 1280
+  
+model:
+  percent_train: 0.1
+  update_irreducible: True
+
+trainer:
+  max_epochs: 100
+  gpus: 1
+  
+eval_set: test
+
+logger:
+  wandb:
+    project: "mnist_update"
+    entity: "mtrazzak"
+    
+optimizer:
+  lr: 0.001
+
+seed: 1
+  
+#python3 run.py -m +experiment=mnist_infi selection_method=reducible_loss_selection,irreducible_loss_selection,cross_entropy_loss_selection trainer.gpus=[0]
+#python3 run.py -m +experiment=mnist_ambi selection_method=uniform_selection_with_tracking,gradnorm_ub_selection trainer.gpus=[1]
+# python3 run.py -m +experiment=mnist_label_noise selection_method=reducible_loss_selection,irreducible_loss_selection,cross_entropy_loss_selection,uniform_selection_with_tracking,gradnorm_ub_selection +datamodule.pc_corrupted=0.0,0.1,0.2,0.3,0.4 trainer.gpus=[0]
+# python3 run.py -m +experiment=mnist_label_noise selection_method=reducible_loss_selection,irreducible_loss_selection,cross_entropy_loss_selection,uniform_selection_with_tracking,gradnorm_ub_selection +datamodule.trainset_corruption.pc_corrupted=0.5,0.6,0.7,0.8,0.9 trainer.gpus=[1]
+# python3 run.py -m +experiment=mnist_update selection_method=reducible_loss_selection trainer.gpus=[0]

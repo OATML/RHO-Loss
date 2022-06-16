@@ -1,0 +1,27 @@
+# @package _global_
+# line above ensures that the experiment overrides root settings:
+# we need this so our configs affect the global/root config. it has to be the first line in the file
+
+defaults:
+  - override /model: multi_model
+  - override /model/large_model: cifar_bayesian_small_cnn
+  - override /datamodule: cifar10_datamodule
+  - override /logger: wandb
+  - override /irreducible_loss_generator: precomputed_loss #note: will need to overwrite checkpoint path on terminal
+  - override /optimizer: adamw
+  - override /selection_method: null # needs to be overriden
+
+# all parameters below will be merged with parameters from default configurations set above
+# this allows you to overwrite only specified parameters
+# Shared across all models.
+
+trainer:
+  min_epochs: 1
+  max_epochs: 150 #an epoch here is actually 0.1 of an epoch
+
+datamodule:
+  batch_size: 640
+  trainset_data_aug: True
+
+optimizer:
+  lr: 0.001

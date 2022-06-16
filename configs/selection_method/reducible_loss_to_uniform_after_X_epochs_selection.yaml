@@ -1,0 +1,2 @@
+_target_: src.curricula.selection_methods.reducible_loss_selection
+switch_to_uniform_epoch: 25

@@ -1,0 +1,2 @@
+run.py -m +experiment=cinic10_multimodel seed=1 selection_method=reducible_loss_selection eval_set=test ++logger.wandb.project="cinic10_holdout_ablation" +logger.wandb.name="cinic10_reducible_loss"
+run.py -m +experiment=cinic10_multimodel seed=2 selection_method=reducible_loss_selection eval_set=test ++logger.wandb.project="cinic10_holdout_ablation"  +logger.wandb.name="cinic10_reducible_loss"

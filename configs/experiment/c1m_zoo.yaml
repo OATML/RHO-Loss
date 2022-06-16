@@ -1,0 +1,46 @@
+# @package _global_
+defaults:
+  - override /model: multi_model
+  - override /model/large_model: null
+  - override /datamodule: clothing1m_dirty_datamodule
+  - override /logger: wandb
+  - override /irreducible_loss_generator: precomputed_loss #note: will need to overwrite checkpoint path on terminal
+  - override /optimizer: adamw
+  - override /selection_method: null # needs to be overriden
+  - _self_
+
+seed: 0
+eval_set: test
+base_outdir: /data/coml-ecr/hert6131/logs
+
+trainer:
+  gpus: 1
+  min_epochs: 30
+  max_epochs: 30 #an epoch here is actually 0.1 of an epoch
+
+irreducible_loss_generator:
+  f: /home/hert6131/c1m_dirty_precalc.pt
+
+datamodule:
+  batch_size: 320
+  data_dir: /tmp/clothing
+  num_workers: 4
+  trainset_data_aug: false  
+
+optimizer:
+  lr: 0.001
+
+logger:
+  wandb:
+    project: "c1m_model_zoo"
+    entity: "mtrazzak"
+
+# model/large_model: c1m_zoo_googlenet, c1m_zoo_inception_v3, c1m_zoo_mobilenet_v2, c1m_zoo_resnet34, c1m_zoo_resnet50, c1m_zoo_vgg11_bn
+# python run.py -m +experiment=c1m_zoo selection_method=uniform_selection seed=13 +datamodule.val_size=100000 trainer.gpus=[0] datamodule.trainset_data_aug=False model/large_model=c1m_zoo_googlenet_pre
+# python run.py -m +experiment=c1m_zoo selection_method=uniform_selection seed=13 +datamodule.val_size=100000 trainer.gpus=[1] datamodule.trainset_data_aug=False model/large_model=c1m_zoo_inception_v3_pre
+# python run.py -m +experiment=c1m_zoo selection_method=uniform_selection seed=13 +datamodule.val_size=100000 trainer.gpus=[2] datamodule.trainset_data_aug=False model/large_model=c1m_zoo_mobilenet_v2_pre
+# python run.py -m +experiment=c1m_zoo selection_method=uniform_selection seed=13 +datamodule.val_size=100000 trainer.gpus=[3] datamodule.trainset_data_aug=False model/large_model=c1m_zoo_densenet121_pre
+# python run.py -m +experiment=c1m_zoo selection_method=reducible_loss_selection seed=13 +datamodule.val_size=100000 trainer.gpus=[0] datamodule.trainset_data_aug=False model/large_model=c1m_zoo_googlenet_pre
+# python run.py -m +experiment=c1m_zoo selection_method=reducible_loss_selection seed=13 +datamodule.val_size=100000 trainer.gpus=[1] datamodule.trainset_data_aug=False model/large_model=c1m_zoo_inception_v3_pre
+# python run.py -m +experiment=c1m_zoo selection_method=reducible_loss_selection seed=13 +datamodule.val_size=100000 trainer.gpus=[2] datamodule.trainset_data_aug=False model/large_model=c1m_zoo_mobilenet_v2_pre
+# python run.py -m +experiment=c1m_zoo selection_method=reducible_loss_selection seed=13 +datamodule.val_size=100000 trainer.gpus=[3] datamodule.trainset_data_aug=False model/large_model=c1m_zoo_densenet121_pre

@@ -1,0 +1,17 @@
+# @package _global_
+
+defaults:
+  - override /model/model: cifar_resnet.yaml
+  - override /datamodule: cifar10_datamodule.yaml
+  - override /callbacks: val_loss.yaml
+
+trainer:
+  max_epochs: 100
+
+datamodule:
+  data_dir: "/scratch-ssd/oatml/data/"
+  batch_size: 320
+
+logger:
+  wandb:
+    project: "jb_cifar10"

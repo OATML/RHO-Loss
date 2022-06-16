@@ -1,0 +1,18 @@
+# @package _global_
+defaults:
+  - override /model/model: cifar100_small_cnn
+  - override /datamodule: cifar100_datamodule.yaml
+  - override /callbacks: val_loss.yaml
+
+trainer:
+  max_epochs: 100
+
+datamodule:
+  batch_size: 320
+  valset_data_aug: True
+
+seed: 12
+
+logger:
+  wandb:
+    project: "cifar100_holdout_irred_2"

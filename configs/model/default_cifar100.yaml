@@ -1,0 +1,9 @@
+defaults:
+  - large_model: cifar100_resnet # set to null here so it can be overrided in a particular experiment.
+  - proxy_model: null
+
+_target_: src.models.MultiModels.MultiModels
+percent_train: 0.1
+update_irreducible: False
+detailed_logging: False
+learning_rate: 0.001

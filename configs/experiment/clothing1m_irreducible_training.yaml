@@ -1,0 +1,35 @@
+# @package _global_
+defaults:
+  - override /model/model: imagenet_resnet18
+  - override /optimizer: adamw.yaml
+  - override /datamodule: clothing1m_datamodule.yaml
+
+
+optimizer:
+  lr: 0.001
+
+trainer:
+  max_epochs: 25
+  gpus: 1
+
+datamodule:
+  batch_size: 64
+  valset_data_aug: True
+
+logger:
+  wandb:
+    project: "clothing1m-samedist"
+    entity: "mtrazzak"
+
+callbacks:
+  model_checkpoint:
+      monitor: "val_loss_epoch" # name of the logged metric which determines when model is improving
+      mode: "min" # can be "max" or "min"
+      save_top_k: 1 # save k best models (determined by above metric)
+
+datamodule:
+  valset_data_aug: True
+  batch_size: 160
+
+work_dir: clothing_multi
+base_outdir: clothing_multi

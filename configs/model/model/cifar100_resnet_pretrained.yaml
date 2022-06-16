@@ -1,0 +1,3 @@
+_target_: src.models.modules.resnet_cifar.resnet18_imagenet
+pretrained: True
+classes: 100

@@ -1,0 +1,5 @@
+defaults:
+  - large_model: cifar_resnet # set to null here so it can be overrided in a particular experiment.
+  - proxy_model: pretrained
+
+pretrained_proxy: True

@@ -1,0 +1,10 @@
+defaults:
+  - large_model: null # set to null here so it can be overrided in a particular experiment.
+  - proxy_model: null
+
+_target_: src.models.MultiModels.MultiModels
+percent_train: 0.1
+update_irreducible: False
+detailed_logging: False
+parallel_implementation: False
+parallel_skip: False

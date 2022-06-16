@@ -1,0 +1,9 @@
+# You can either use the precomputed irreducible losses or compute the
+# irreducible losses again at each iteration with the irreducible loss model.
+# Most of the time, you will want to use the precomputed losses, as this is much
+# faster. 
+# Use this config file to use precomputed losses.
+#
+
+_target_: torch.load
+f: "/Users/jbrauner/repos/goldiprox-hydra/outputs/2021-09-09/15-25-00/checkpoints/irred_losses_and_checks.pt" #path to precomputed loss file

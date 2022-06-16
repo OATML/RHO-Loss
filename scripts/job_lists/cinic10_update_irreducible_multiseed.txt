@@ -1,0 +1,3 @@
+run.py -m +experiment=cinic10_multimodel seed=1 selection_method=reducible_loss_selection irreducible_loss_generator=irreducible_loss_model +logger.wandb.name="cinic10_train_irreducible" model.update_irreducible=True eval_set=test
+run.py -m +experiment=cinic10_multimodel seed=2 selection_method=reducible_loss_selection irreducible_loss_generator=irreducible_loss_model +logger.wandb.name="cinic10_train_irreducible" model.update_irreducible=True eval_set=test
+run.py -m +experiment=cinic10_multimodel seed=3 selection_method=reducible_loss_selection irreducible_loss_generator=irreducible_loss_model +logger.wandb.name="cinic10_train_irreducible" model.update_irreducible=True eval_set=test

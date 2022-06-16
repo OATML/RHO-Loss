@@ -1,0 +1,8 @@
+_target_: src.models.MultiModels.MultiModels
+large_model: 
+    _target_: torchvision.models.resnet18
+proxy_model: null
+percent_train: 0.1
+update_irreducible: False
+detailed_logging: False
+learning_rate: 0.0005

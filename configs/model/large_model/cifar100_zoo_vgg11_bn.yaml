@@ -1,0 +1,2 @@
+_target_: src.models.modules.cifar_model_zoo.vgg.vgg11_bn
+num_classes: 100

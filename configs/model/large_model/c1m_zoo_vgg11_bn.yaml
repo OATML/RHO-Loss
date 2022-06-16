@@ -1,0 +1,2 @@
+_target_: torchvision.models.vgg11_bn
+num_classes: 14

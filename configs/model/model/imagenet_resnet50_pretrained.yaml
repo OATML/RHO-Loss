@@ -1,0 +1,3 @@
+_target_: torchvision.models.resnet50
+pretrained: True
+progress: True

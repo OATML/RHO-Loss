@@ -1,0 +1,3 @@
+_target_: src.curricula.temperature_schedules.geometric_schedule
+initial_temp: 0.1
+increment_factor: 3.4

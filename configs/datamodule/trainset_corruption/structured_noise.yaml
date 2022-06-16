@@ -1,0 +1,4 @@
+label_noise: False
+input_noise: False
+structured_noise: True
+pc_corrupted: 0.5

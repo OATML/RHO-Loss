@@ -1,0 +1,2 @@
+_target_: torchvision.models.densenet121
+num_classes: 14

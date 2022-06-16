@@ -1,0 +1,22 @@
+# @package _global_
+defaults:
+  - override /model/model: mnist_mlp128
+  - override /datamodule: infimnist_datamodule.yaml
+  - override /optimizer: adamw.yaml
+
+optimizer:
+  lr: 0.001
+
+trainer:
+  max_epochs: 10
+  gpus: 1
+
+logger:
+  wandb:
+    project: "mnist_infi"
+
+callbacks:
+  model_checkpoint:
+      monitor: "val_loss_epoch" # name of the logged metric which determines when model is improving
+      mode: "min" # can be "max" or "min"
+      save_top_k: 1 # save k best models (determined by above metric)

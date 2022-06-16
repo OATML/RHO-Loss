@@ -1,0 +1,57 @@
+# @package _global_
+mode: "svp"
+  
+defaults:
+  - override /model/proxy_model: pretrained
+  - override /model/large_model: imagenet_resnet50_pretrained
+  - override /datamodule: clothing1m_dirty_datamodule
+  - override /logger: wandb
+  - override /optimizer: adamw
+
+seed: 12
+percent_train: 0.1
+selection_method: "entropy"
+eval_set: "test"
+base_outdir: logs
+
+model:
+  pretrained_proxy: True
+  proxy_model:
+      checkpoint_path: "/auto/users/muhzak/goldi_checkpoints/svp_dirtyc1m.ckpt"
+  
+
+datamodule:
+  data_dir: '/scratch-ssd/oatml/data/clothing'
+  batch_size: 64
+  num_workers: 8
+  pin_memory: True
+
+trainer:
+  gpus: 1
+  min_epochs: 50
+  max_epochs: 50
+
+logger:
+    wandb:
+      project: "svp_final"
+      entity: "goldiprox"
+
+proxy_max_epochs: 10
+
+# path to original working directory
+# hydra hijacks working directory by changing it to the current log directory,
+# so it's useful to have this path as a special variable
+# learn more here: https://hydra.cc/docs/next/tutorials/basic/running_your_app/working_directory
+work_dir: ${hydra:runtime.cwd}
+
+# use `python run.py debug=true` for easy debugging!
+# this will run 1 train, val and test loop with only 1 batch
+# equivalent to running `python run.py trainer.fast_dev_run=true`
+# (this is placed here just for easier access from command line)
+debug: False
+# pretty print config at the start of the run using Rich library
+print_config: True
+# disable python warnings if they annoy you
+ignore_warnings: True
+# check performance on test set, using the best model achieved during training
+test_after_training: True

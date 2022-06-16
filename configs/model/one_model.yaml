@@ -1,0 +1,4 @@
+defaults:
+  - model: null # set to null here so it can be overrided in a particular experiment.
+
+_target_: src.models.OneModel.OneModel

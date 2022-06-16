@@ -1,0 +1,2 @@
+_target_: src.models.modules.vgg_cifar.vgg11
+in_channels: 3

@@ -1,0 +1,14 @@
+defaults:
+  - trainset_corruption: null #can be overriden!
+  - valset_corruption: null #can be overriden!
+  - testset_corruption: null #can be overriden!
+
+_target_: src.datamodules.datamodules.CIFAR10DataModule
+data_dir: '/scratch-ssd/goldiprox/data/'
+batch_size: 320
+num_workers: 4
+pin_memory: True
+shuffle: True
+trainset_data_aug: False
+valset_data_aug: False
+valset_fraction: 1.0 #fraction of the valset to be used (e.g. in training the irreducible loss model), relative to the size we had in the ICLR submission (e.g. 50% of CIFAR10 "train" set, or full CINIC valset)

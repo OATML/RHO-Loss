@@ -1,0 +1,28 @@
+# @package _global_
+defaults:
+  - override /model: multi_model
+  - override /model/large_model: c1m_resnet50_pretrained
+  - override /datamodule: clothing1m_dirty_datamodule
+  - override /logger: wandb
+  - override /irreducible_loss_generator: irreducible_loss_model # Note: override
+  - override /optimizer: adamw
+  - override /selection_method: null # Note: override
+
+
+trainer:
+  min_epochs: 50
+  max_epochs: 50
+
+datamodule:
+  batch_size: 320
+
+optimizer:
+  lr: 0.001
+
+logger:
+  wandb:
+    project: "clothing1m"
+
+eval_set: test
+
+base_outdir: logs

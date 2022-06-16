@@ -1,0 +1,3 @@
+_target_: src.models.modules.models.MLP
+hidden_units: 512
+dropout: 0.5 # add dropout, use MC dropout for BALD and other active learning benchmarks

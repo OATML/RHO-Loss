@@ -1,0 +1,5 @@
+defaults:
+  - large_model: mnist_mlp512 # set to null here so it can be overrided in a particular experiment.
+  - proxy_model: mnist_mlp512_pre
+
+pretrained_proxy: True

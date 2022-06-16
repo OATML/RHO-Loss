@@ -1,0 +1,19 @@
+# @package _global_
+
+defaults:
+  - override /model/large_model: cifar_resnet.yaml
+  - override /datamodule: cifar10_datamodule.yaml
+  
+model:
+  percent_train: 0.1
+
+trainer:
+  max_epochs: 175
+
+datamodule:
+  data_dir: "/scratch-ssd/oatml/data/"
+  batch_size: 320
+
+logger:
+  wandb:
+    project: "jb_cifar10"

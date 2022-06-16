@@ -1,0 +1,17 @@
+# @package _global_
+
+# This contains common settings you would want for most of your experiments, when running on your laptop.
+
+# to execute this experiment run:
+# python run[_irreducible].py +run_condition=local_run
+    
+datamodule:
+  data_dir: '/Users/jbrauner/repos/goldiprox-hydra/data/' #replace with yours
+  
+trainer:
+  gpus: 0
+  max_epochs: 2
+
+logger:
+  wandb:
+    project: "jan_playground" # replace with yours

@@ -1,0 +1,45 @@
+# @package _global_
+# line above ensures that the experiment overrides root settings:
+# we need this so our configs affect the global/root config. it has to be the first line in the file
+
+defaults:
+  - override /model: multi_model
+  - override /model/large_model: c1m_resnet50_pretrained
+  - override /datamodule: clothing1m_dirty_datamodule
+  - override /logger: wandb
+  - override /irreducible_loss_generator: irreducible_loss_model #note: will need to overwrite checkpoint path on terminal
+  - override /optimizer: adamw
+  - override /selection_method: null # needs to be overriden
+
+# all parameters below will be merged with parameters from default configurations set above
+# this allows you to overwrite only specified parameters
+# Shared across all models.
+seed: 0
+
+trainer:
+  gpus: 1
+  min_epochs: 30
+  max_epochs: 30 #an epoch here is actually 0.1 of an epoch
+  val_check_interval: 0.25
+
+irreducible_loss_generator:
+  # checkpoint_path: "/auto/users/muhzak/goldiprox-hydra/logs/runs/2021-11-12/14-40-28/checkpoints/epoch_008.ckpt" clean
+  # checkpoint_path: /auto/users/muhzak/goldiprox-hydra/clothing_multi/runs/2021-11-23/10-09-52/checkpoints/epoch_007.ckpt
+  # checkpoint_path: /auto/users/muhzak/goldiprox-hydra/clothing_multi/multiruns/2022-02-20_15-19-45/0/checkpoints/epoch_006.ckpt
+  checkpoint_path: /auto/users/muhzak/goldi_checkpoints/c1m_dirty.ckpt
+
+datamodule:
+  batch_size: 320
+
+optimizer:
+  lr: 0.001
+
+logger:
+  wandb:
+    project: "c1m_final"
+    entity: "goldiprox"
+    tags: ["logits"]
+
+eval_set: test
+
+base_outdir: logs

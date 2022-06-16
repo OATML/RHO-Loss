@@ -1,0 +1,7 @@
+_target_: src.datamodules.datamodules.ImageNetDataModule
+data_dir: '/scratch-ssd/oatml/data/imagenet/'
+batch_size: 1280
+num_workers: 5
+pin_memory: True
+shuffle: True
+valset_fraction: 1.0 #fraction of the valset to be used (e.g. in training the irreducible loss model), relative to the size we had in the ICLR submission (e.g. 50% of CIFAR10 "train" set, or full CINIC valset)

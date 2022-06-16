@@ -1,0 +1,13 @@
+defaults:
+  - trainset_corruption: null #can be overriden!
+  - valset_corruption: null #can be overriden!
+  - testset_corruption: null #can be overriden!
+
+_target_: src.datamodules.datamodules.Clothing1MDataModule
+data_dir: '/scratch-ssd/oatml/data/clothing/'
+batch_size: 320
+num_workers: 4
+pin_memory: True
+shuffle: True
+trainset_data_aug: False
+valset_data_aug: False

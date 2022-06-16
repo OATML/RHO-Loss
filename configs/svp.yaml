@@ -1,0 +1,58 @@
+# @package _global_
+mode: "svp"
+  
+defaults:
+  - trainer: default.yaml
+  - model: svp_cifar.yaml
+  - svp_selection: entropy.yaml
+  - optimizer: adamw.yaml
+  - scheduler: null
+  - datamodule: cifar10_datamodule.yaml
+  - callbacks: wandb.yaml
+  - logger: wandb.yaml
+  - hydra: default.yaml
+  - _self_
+
+seed: 1
+percent_train: 0.1
+selection_method: "entropy"
+eval_set: "test"
+base_outdir: logs
+
+datamodule:
+  data_dir: '/scratch-ssd/goldiprox/data/'
+  batch_size: 32
+  num_workers: 4
+  pin_memory: True
+  trainset_data_aug: True
+
+trainer:
+  _target_: pytorch_lightning.Trainer
+  gpus: 1
+  min_epochs: 150
+  max_epochs: 150
+
+logger:
+    wandb:
+      project: "svp_final"
+      entity: "goldiprox"
+
+proxy_max_epochs: 25
+
+# path to original working directory
+# hydra hijacks working directory by changing it to the current log directory,
+# so it's useful to have this path as a special variable
+# learn more here: https://hydra.cc/docs/next/tutorials/basic/running_your_app/working_directory
+work_dir: ${hydra:runtime.cwd}
+
+# use `python run.py debug=true` for easy debugging!
+# this will run 1 train, val and test loop with only 1 batch
+# equivalent to running `python run.py trainer.fast_dev_run=true`
+# (this is placed here just for easier access from command line)
+debug: False
+# pretty print config at the start of the run using Rich library
+print_config: True
+# disable python warnings if they annoy you
+ignore_warnings: True
+# check performance on test set, using the best model achieved during training
+test_after_training: True

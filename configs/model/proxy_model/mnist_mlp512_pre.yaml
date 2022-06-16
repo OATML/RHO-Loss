@@ -1,0 +1,2 @@
+_target_: src.models.OneModel.OneModel.load_from_checkpoint
+checkpoint_path: "/auto/users/muhzak/goldi_checkpoints/mnist.ckpt"

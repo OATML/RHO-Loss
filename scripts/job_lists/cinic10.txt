@@ -1,0 +1,30 @@
+run_standard_training.py -m +experiment=cinic10_importance_sampling seed=1 +logger.wandb.name="cinic10_importance_sampling" eval_set=test
+run.py -m +experiment=cinic10_multimodel seed=1 selection_method=cross_entropy_loss_selection +logger.wandb.name="cinic10_loss" eval_set=test
+run.py -m +experiment=cinic10_multimodel seed=1 selection_method=gradnorm_ub_selection +logger.wandb.name="cinic10_gradnorm_ub" eval_set=test
+run.py -m +experiment=cinic10_multimodel seed=1 selection_method=irreducible_loss_selection +logger.wandb.name="cinic10_irreducible_loss" eval_set=test
+run.py -m +experiment=cinic10_multimodel seed=1 selection_method=reducible_loss_selection +logger.wandb.name="cinic10_reducible_loss" eval_set=test
+run.py -m +experiment=cinic10_multimodel seed=1 selection_method=uniform_selection +logger.wandb.name="cinic10_uniform" eval_set=test
+run.py -m +experiment=cinic10_multimodel seed=1 selection_method=cross_entropy_loss_selection +logger.wandb.name="cinic10_loss_parallel_implementation" model.parallel_implementation=True eval_set=test
+run.py -m +experiment=cinic10_multimodel seed=1 selection_method=gradnorm_ub_selection +logger.wandb.name="cinic10_gradnorm_ub_parallel_implementation" model.parallel_implementation=True eval_set=test
+run.py -m +experiment=cinic10_multimodel seed=1 selection_method=irreducible_loss_selection +logger.wandb.name="cinic10_irreducible_loss_parallel_implementation" model.parallel_implementation=True eval_set=test
+run.py -m +experiment=cinic10_multimodel seed=1 selection_method=reducible_loss_selection +logger.wandb.name="cinic10_reducible_loss_parallel_implementation" model.parallel_implementation=True eval_set=test
+run_standard_training.py -m +experiment=cinic10_importance_sampling seed=2 +logger.wandb.name="cinic10_importance_sampling" eval_set=test
+run.py -m +experiment=cinic10_multimodel seed=2 selection_method=cross_entropy_loss_selection +logger.wandb.name="cinic10_loss" eval_set=test
+run.py -m +experiment=cinic10_multimodel seed=2 selection_method=gradnorm_ub_selection +logger.wandb.name="cinic10_gradnorm_ub" eval_set=test
+run.py -m +experiment=cinic10_multimodel seed=2 selection_method=irreducible_loss_selection +logger.wandb.name="cinic10_irreducible_loss" eval_set=test
+run.py -m +experiment=cinic10_multimodel seed=2 selection_method=reducible_loss_selection +logger.wandb.name="cinic10_reducible_loss" eval_set=test
+run.py -m +experiment=cinic10_multimodel seed=2 selection_method=uniform_selection +logger.wandb.name="cinic10_uniform" eval_set=test
+run.py -m +experiment=cinic10_multimodel seed=2 selection_method=cross_entropy_loss_selection +logger.wandb.name="cinic10_loss_parallel_implementation" model.parallel_implementation=True eval_set=test
+run.py -m +experiment=cinic10_multimodel seed=2 selection_method=gradnorm_ub_selection +logger.wandb.name="cinic10_gradnorm_ub_parallel_implementation" model.parallel_implementation=True eval_set=test
+run.py -m +experiment=cinic10_multimodel seed=2 selection_method=irreducible_loss_selection +logger.wandb.name="cinic10_irreducible_loss_parallel_implementation" model.parallel_implementation=True eval_set=test
+run.py -m +experiment=cinic10_multimodel seed=2 selection_method=reducible_loss_selection +logger.wandb.name="cinic10_reducible_loss_parallel_implementation" model.parallel_implementation=True eval_set=test
+run_standard_training.py -m +experiment=cinic10_importance_sampling seed=3 +logger.wandb.name="cinic10_importance_sampling" eval_set=test
+run.py -m +experiment=cinic10_multimodel seed=3 selection_method=cross_entropy_loss_selection +logger.wandb.name="cinic10_loss" eval_set=test
+run.py -m +experiment=cinic10_multimodel seed=3 selection_method=gradnorm_ub_selection +logger.wandb.name="cinic10_gradnorm_ub" eval_set=test
+run.py -m +experiment=cinic10_multimodel seed=3 selection_method=irreducible_loss_selection +logger.wandb.name="cinic10_irreducible_loss" eval_set=test
+run.py -m +experiment=cinic10_multimodel seed=3 selection_method=reducible_loss_selection +logger.wandb.name="cinic10_reducible_loss" eval_set=test
+run.py -m +experiment=cinic10_multimodel seed=3 selection_method=uniform_selection +logger.wandb.name="cinic10_uniform" eval_set=test
+run.py -m +experiment=cinic10_multimodel seed=3 selection_method=cross_entropy_loss_selection +logger.wandb.name="cinic10_loss_parallel_implementation" model.parallel_implementation=True eval_set=test
+run.py -m +experiment=cinic10_multimodel seed=3 selection_method=gradnorm_ub_selection +logger.wandb.name="cinic10_gradnorm_ub_parallel_implementation" model.parallel_implementation=True eval_set=test
+run.py -m +experiment=cinic10_multimodel seed=3 selection_method=irreducible_loss_selection +logger.wandb.name="cinic10_irreducible_loss_parallel_implementation" model.parallel_implementation=True eval_set=test
+run.py -m +experiment=cinic10_multimodel seed=3 selection_method=reducible_loss_selection +logger.wandb.name="cinic10_reducible_loss_parallel_implementation" model.parallel_implementation=True eval_set=test

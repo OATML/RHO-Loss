@@ -1,0 +1,2 @@
+run.py -m +experiment=cifar10_active_learning seed=1 selection_method=reducible_loss_selection eval_set=test logger.wandb.tags=[cifar10_active_learning] ++logger.wandb.project="cifar10_active_learning_updatedv2" +logger.wandb.name="cifar10_reducible_loss_dropout_irrlomo"
+run.py -m +experiment=cifar10_active_learning seed=2 selection_method=reducible_loss_selection eval_set=test logger.wandb.tags=[cifar10_active_learning] ++logger.wandb.project="cifar10_active_learning_updatedv2" +logger.wandb.name="cifar10_reducible_loss_dropout_irrlomo"

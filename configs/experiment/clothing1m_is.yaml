@@ -1,0 +1,34 @@
+# @package _global_
+# line above ensures that the experiment overrides root settings:
+# we need this so our configs affect the global/root config. it has to be the first line in the file
+
+defaults:
+  - override /model: importance_sampling_model
+  - override /model/model: imagenet_resnet50_pretrained
+  - override /datamodule: clothing1m_dirty_datamodule
+  - override /logger: wandb
+  - override /optimizer: adamw
+  - override /scheduler: null
+
+# all parameters below will be merged with parameters from default configurations set above
+# this allows you to overwrite only specified parameters
+
+seed: 12
+eval_set: test
+trainer:
+  min_epochs: 50 #an epoch here is actually 0.1 of an epoch
+  max_epochs: 50 #an epoch here is actually 0.1 of an epoch
+  gpus: 1
+
+datamodule:
+  batch_size: 240
+  data_dir: '/scratch-ssd/oatml/data/clothing/'
+
+optimizer:
+  lr: 0.001
+
+logger:
+  wandb:
+    project: clothing1m-samedist
+
+# python run_standard_training.py -m +experiment=clothing1m_is seed=12 trainer.gpus=[0]

@@ -1,0 +1,15 @@
+run.py -m +experiment=cinic10_multimodel seed=1 selection_method=reducible_loss_selection +logger.wandb.name="cinic10_percent_train_0.05" model.percent_train=0.05 datamodule.batch_size=1280 eval_set=test
+run.py -m +experiment=cinic10_multimodel seed=1 selection_method=reducible_loss_selection +logger.wandb.name="cinic10_percent_train_0.15" model.percent_train=0.15 datamodule.batch_size=428 eval_set=test
+run.py -m +experiment=cinic10_multimodel seed=1 selection_method=reducible_loss_selection +logger.wandb.name="cinic10_percent_train_0.2" model.percent_train=0.2 datamodule.batch_size=320 eval_set=test
+run.py -m +experiment=cinic10_multimodel seed=1 selection_method=reducible_loss_selection +logger.wandb.name="cinic10_percent_train_0.25" model.percent_train=0.25 datamodule.batch_size=240 eval_set=test
+run.py -m +experiment=cinic10_multimodel seed=1 selection_method=reducible_loss_selection +logger.wandb.name="cinic10_percent_train_0.5" model.percent_train=0.5 datamodule.batch_size=120 eval_set=test
+run.py -m +experiment=cinic10_multimodel seed=2 selection_method=reducible_loss_selection +logger.wandb.name="cinic10_percent_train_0.05" model.percent_train=0.05 datamodule.batch_size=1280 eval_set=test
+run.py -m +experiment=cinic10_multimodel seed=2 selection_method=reducible_loss_selection +logger.wandb.name="cinic10_percent_train_0.15" model.percent_train=0.15 datamodule.batch_size=428 eval_set=test
+run.py -m +experiment=cinic10_multimodel seed=2 selection_method=reducible_loss_selection +logger.wandb.name="cinic10_percent_train_0.2" model.percent_train=0.2 datamodule.batch_size=320 eval_set=test
+run.py -m +experiment=cinic10_multimodel seed=2 selection_method=reducible_loss_selection +logger.wandb.name="cinic10_percent_train_0.25" model.percent_train=0.25 datamodule.batch_size=240 eval_set=test
+run.py -m +experiment=cinic10_multimodel seed=2 selection_method=reducible_loss_selection +logger.wandb.name="cinic10_percent_train_0.5" model.percent_train=0.5 datamodule.batch_size=120 eval_set=test
+run.py -m +experiment=cinic10_multimodel seed=3 selection_method=reducible_loss_selection +logger.wandb.name="cinic10_percent_train_0.05" model.percent_train=0.05 datamodule.batch_size=1280 eval_set=test
+run.py -m +experiment=cinic10_multimodel seed=3 selection_method=reducible_loss_selection +logger.wandb.name="cinic10_percent_train_0.15" model.percent_train=0.15 datamodule.batch_size=428 eval_set=test
+run.py -m +experiment=cinic10_multimodel seed=3 selection_method=reducible_loss_selection +logger.wandb.name="cinic10_percent_train_0.2" model.percent_train=0.2 datamodule.batch_size=320 eval_set=test
+run.py -m +experiment=cinic10_multimodel seed=3 selection_method=reducible_loss_selection +logger.wandb.name="cinic10_percent_train_0.25" model.percent_train=0.25 datamodule.batch_size=240 eval_set=test
+run.py -m +experiment=cinic10_multimodel seed=3 selection_method=reducible_loss_selection +logger.wandb.name="cinic10_percent_train_0.5" model.percent_train=0.5 datamodule.batch_size=120 eval_set=test

@@ -1,0 +1,2 @@
+_target_: src.models.modules.models.MLP
+hidden_units: 128

@@ -1,0 +1,23 @@
+# @package _global_
+
+defaults:
+  - override /model/model: cifar100_small_cnn
+  - override /datamodule: cifar100_datamodule.yaml
+  - override /callbacks: val_loss.yaml
+
+trainer:
+  max_epochs: 100
+
+datamodule:
+  data_dir: "/scratch-ssd/oatml/data/"
+  batch_size: 320
+
+logger:
+  wandb:
+    entity: "mtrazzak"
+    project: "cifar100_double_new"
+    
+# sbatch submit_goldi.sh python run_double_irreducible.py \
+# +experiment=cifar100_double_irlomo_irred \
+# seed=12 \
+# +logger.wandb.name=train_double_IrLoMo_sCNN \

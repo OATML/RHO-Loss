@@ -1,0 +1,8 @@
+# You can either use the precomputed irreducible losses or compute the
+# irreducible losses again at each iteration with the irreducible loss model.
+# Most of the time, you will want to use the precomputed losses, as this is much
+# faster. 
+# Use this config file to recompute the losses at each iteration.
+#
+_target_: src.models.OneModel.OneModel.load_from_checkpoint
+checkpoint_path: /auto/users/muhzak/goldiprox-hydra/logs/runs/2021-09-26/16-14-03/checkpoints/epoch_029.ckpt

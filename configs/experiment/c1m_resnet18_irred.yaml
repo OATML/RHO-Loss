@@ -1,0 +1,17 @@
+# @package _global_
+
+defaults:
+  - override /model/model: c1m_resnet18
+  - override /datamodule: clothing1m_dirty_datamodule
+  - override /callbacks: val_loss
+
+trainer:
+  max_epochs: 100
+
+datamodule:
+  batch_size: 64
+  valset_data_aug: True
+
+logger:
+  wandb:
+    project: "clothing1m"

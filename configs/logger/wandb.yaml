@@ -1,0 +1,13 @@
+wandb:
+  _target_: pytorch_lightning.loggers.wandb.WandbLogger
+  project: "goldiprox"
+  name: null
+  save_dir: "."
+  offline: False # set True to store all logs only locally
+  id: null # pass correct id to resume experiment!
+  entity: "goldiprox" 
+  log_model: False
+  prefix: ""
+  job_type: "train"
+  group: ""
+  tags: []

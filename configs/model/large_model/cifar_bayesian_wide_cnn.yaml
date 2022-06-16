@@ -1,0 +1,3 @@
+_target_: src.models.modules.models.wide_cnn
+in_channels: 3
+dropout: 0.25

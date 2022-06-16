@@ -1,0 +1,2 @@
+_target_: src.models.modules.cifar_model_zoo.densenet.densenet121
+num_classes: 100

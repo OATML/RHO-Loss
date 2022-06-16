@@ -1,0 +1,34 @@
+BootStrap: docker
+From: ubuntu:18.04
+
+# Singularity Recipe for GoldiProx PyTorch Experiments experiments
+#
+# To run in this shell pointing to data at some path, you can execute
+# singularity shell -B /data/coml-ecr/datasets:/datasets golidprox.sif script.sh
+#
+# Note that this recipe can only be built on a machine where you are root, the
+# build command is
+# sudo singularity build goldiprox.sif goldiprox.def
+
+%post
+    apt -y update
+    apt -y upgrade
+    apt -y install software-properties-common
+    add-apt-repository ppa:ubuntugis/ubuntugis-unstable
+    apt -y update
+    apt -y install python3-pip
+    pip3 install --upgrade pip
+    apt -y install build-essential libssl-dev libffi-dev python3-dev
+    apt-get -y install libsm6 libxrender1 libfontconfig1
+    apt-get -y install libgtk2.0-dev
+    apt-get -y install python-numpy
+    pip3 install numpy opencv-python retrying requests scipy scikit-image
+    pip3 install --no-cache-dir torch torchvision matplotlib ipython tensorflow-gpu
+    pip3 install tiffile imutils gpustat pandas pyarrow scikit-learn tqdm pillow
+    pip3 install affine albumentations networkx rich seaborn
+    pip3 install jupyterlab pytorch-lightning wandb
+    pip3 install hydra-core hydra-colorlog hydra-optuna-sweeper hydra-submitit-launcher
+
+%environment
+
+%runscript

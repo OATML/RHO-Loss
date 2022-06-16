@@ -1,0 +1,56 @@
+# @package _global_
+mode: "irreducible"
+  
+defaults:
+  - trainer: default.yaml
+  - model: one_model.yaml
+  - optimizer: sgd.yaml
+  - scheduler: cosine_annealing.yaml
+  - datamodule: qmnist_datamodule.yaml
+  - callbacks: default.yaml
+  - logger: wandb.yaml
+  - hydra: default.yaml
+  - _self_
+
+seed: 12
+
+datamodule:
+  data_dir: '/scratch-ssd/goldiprox/data/'
+  batch_size: 320
+  num_workers: 4
+  pin_memory: True
+  # irreducible_train_val_test_split: True   # not used yet
+
+trainer:
+  _target_: pytorch_lightning.Trainer
+  gpus: 1
+  min_epochs: 100
+  max_epochs: 100
+  progress_bar_refresh_rate: 20
+  val_check_interval: 1.
+
+  
+optimizer:
+  lr: 0.001
+
+# path to original working directory
+# hydra hijacks working directory by changing it to the current log directory,
+# so it's useful to have this path as a special variable
+# learn more here: https://hydra.cc/docs/next/tutorials/basic/running_your_app/working_directory
+work_dir: ${hydra:runtime.cwd}
+
+# use `python run.py debug=true` for easy debugging!
+# this will run 1 train, val and test loop with only 1 batch
+# equivalent to running `python run.py trainer.fast_dev_run=true`
+# (this is placed here just for easier access from command line)
+debug: False
+# pretty print config at the start of the run using Rich library
+print_config: True
+# disable python warnings if they annoy you
+ignore_warnings: True
+# check performance on test set, using the best model achieved during training
+test_after_training: True
+
+base_outdir: logs
+
+eval_set: val #val or test

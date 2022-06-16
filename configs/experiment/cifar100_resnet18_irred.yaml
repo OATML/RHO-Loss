@@ -1,0 +1,17 @@
+# @package _global_
+defaults:
+  - override /model/model: cifar100_resnet.yaml
+  - override /datamodule: cifar100_datamodule.yaml
+  - override /callbacks: val_loss.yaml
+
+trainer:
+  max_epochs: 100
+  gpus: 1
+
+datamodule:
+  batch_size: 320
+  valset_data_aug: True
+
+logger:
+  wandb:
+    project: "cifar100"

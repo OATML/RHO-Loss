@@ -1,0 +1,3 @@
+_target_: src.models.modules.resnet_c1m.resnet50_imagenet
+pretrained: True
+classes: 14

@@ -1,0 +1,21 @@
+# @package _global_
+defaults:
+  - override /model/large_model: cifar100_resnet.yaml
+  - override /datamodule: cifar100_datamodule.yaml
+  - override /irreducible_loss_generator: irreducible_loss_model.yaml # need to override
+
+model:
+  percent_train: 0.1
+
+trainer:
+  max_epochs: 150
+  gpus: 1
+
+datamodule:
+  batch_size: 320
+
+eval_set: test
+
+logger:
+  wandb:
+    project: "cifar100"

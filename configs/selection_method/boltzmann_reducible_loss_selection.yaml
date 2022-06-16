@@ -1,0 +1,4 @@
+defaults:
+  - temperature_schedule: fixed
+
+_target_: src.curricula.selection_methods.boltzmann_reducible_loss_selection
