@@ -8,7 +8,7 @@ import hydra
 
 # pytorch related imports
 import torch
-from torchmetrics.functional import accuracy
+from pytorch_lightning.metrics.functional import accuracy
 from torch import nn
 from torch.nn import functional as F
 

@@ -2,13 +2,13 @@
 defaults:
   - override /model/large_model: cifar100_resnet.yaml
   - override /datamodule: cifar100_datamodule.yaml
-  - override /irreducible_loss_generator: irreducible_loss_model.yaml # need to override
+  
 
 model:
   percent_train: 0.1
 
 trainer:
-  max_epochs: 150
+  max_epochs: 175
   gpus: 1
 
 datamodule:
@@ -18,4 +18,4 @@ eval_set: test
 
 logger:
   wandb:
-    project: "cifar100"
+    project: "jb-cifar100-full-trainset"

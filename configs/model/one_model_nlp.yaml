@@ -1,0 +1,2 @@
+_target_: src.models.OneModel_nlp.OneModel
+weight_decay: 0.01

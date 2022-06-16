@@ -24,19 +24,18 @@ irreducible_loss_generator:
 
 datamodule:
   batch_size: 320
-  data_dir: '/scratch-ssd/oatml/data/clothing/'
-  percent_clean: 30
+  data_dir: '/home/yarin.oxford/mo/clothing/'
 
 optimizer:
   lr: 0.001
 
 model:
   percent_train: 0.1
-  update_irreducible: False
+  update_irreducible: True
 
 logger:
   wandb:
-    project: "clothing1m_track"
+    project: "clothing1m"
     entity: "mtrazzak"
 
 eval_set: test

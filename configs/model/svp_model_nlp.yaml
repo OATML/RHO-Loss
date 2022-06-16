@@ -1,0 +1,5 @@
+defaults:
+  - large_model: nlp_GLUETransformer # set to null here so it can be overrided in a particular experiment.
+  - proxy_model: pretrained_nlp
+
+pretrained_proxy: False

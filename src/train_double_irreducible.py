@@ -139,12 +139,12 @@ def train(config: DictConfig) -> Optional[float]:
     trainer_1.fit(
         pl_model_1,
         train_dataloader=train_split_1_dataloader,
-        val_dataloaders=datamodule.val_dataloader(),
+        val_dataloaders=train_split_2_dataloader,
     )
     trainer_2.fit(
         pl_model_2,
         train_dataloader=train_split_2_dataloader,
-        val_dataloaders=datamodule.val_dataloader(),
+        val_dataloaders=train_split_1_dataloader,
     )
 
     model_1 = OneModel.load_from_checkpoint(
@@ -164,21 +164,19 @@ def train(config: DictConfig) -> Optional[float]:
     )
 
     irreducible_loss_and_checks_merged = copy.deepcopy(irreducible_loss_and_checks_1)
-    # average the heldout accuracy and loss for the merged model
-    irreducible_loss_and_checks_merged["heldout_accuracy"] = (
-        0.5 * irreducible_loss_and_checks_1["heldout_accuracy"]
-        + 0.5 * irreducible_loss_and_checks_2["heldout_accuracy"]
-    )
-    irreducible_loss_and_checks_merged["heldout_average_loss"] = (
-        0.5 * irreducible_loss_and_checks_1["heldout_average_loss"]
-        + 0.5 * irreducible_loss_and_checks_2["heldout_average_loss"]
-    )
+    
+    # model 1 should be used to compute the losses from split 2, and vice versa
     irreducible_loss_and_checks_merged["irreducible_losses"][
         train_split_1_indices
     ] = irreducible_loss_and_checks_2["irreducible_losses"][train_split_1_indices]
     irreducible_loss_and_checks_merged["irreducible_losses"][
         train_split_2_indices
     ] = irreducible_loss_and_checks_1["irreducible_losses"][train_split_2_indices]
+
+   # average the heldout accuracy and loss for the merged model
+    irreducible_loss_and_checks_merged["heldout_average_loss"] = np.nanmean(irreducible_loss_and_checks_merged["irreducible_losses"])
+    irreducible_loss_and_checks_merged["heldout_accuracy"] = np.nan
+
 
     path = os.path.join(
         os.path.dirname(trainer_1.checkpoint_callback.best_model_path),

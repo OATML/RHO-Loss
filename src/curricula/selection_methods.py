@@ -663,7 +663,6 @@ class boltzmann_reducible_loss_selection:
 
 class reducible_loss_to_uniform_after_X_epochs_selection:
     bald = False
-
     def __init__(self, switch_to_uniform_epoch=25):
         self.switch_to_uniform_epoch = switch_to_uniform_epoch
         self.reducible_loss_selection = reducible_loss_selection

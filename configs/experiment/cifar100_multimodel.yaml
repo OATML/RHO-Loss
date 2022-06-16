@@ -11,7 +11,7 @@ model:
   percent_train: 0.1
 
 trainer:
-  max_epochs: 150
+  max_epochs: 25
   gpus: 1
 
 datamodule:
@@ -22,5 +22,5 @@ eval_set: test
 
 logger:
   wandb:
-    project: "cifar100"
+    project: "label_noise"
     entity: "goldiprox"

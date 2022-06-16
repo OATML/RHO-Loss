@@ -1,0 +1,2 @@
+_target_: src.curricula.temperature_schedules.fixed_schedule
+initial_temp: 0.25

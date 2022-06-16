@@ -1,0 +1,41 @@
+# @package _global_
+
+defaults:
+  - model/large_model: cifar_resnet.yaml
+  - override /datamodule: cifar10_datamodule.yaml
+  
+model:
+  proxy_model: null
+  percent_train: 0.1
+
+trainer:
+  max_epochs: 100
+
+logger:
+  wandb:
+    project: "jan_playground"
+
+
+# path to original working directory
+# hydra hijacks working directory by changing it to the current log directory,
+# so it's useful to have this path as a special variable
+# learn more here: https://hydra.cc/docs/next/tutorials/basic/running_your_app/working_directory
+work_dir: ${hydra:runtime.cwd}
+
+# use `python run.py debug=true` for easy debugging!
+# this will run 1 train, val and test loop with only 1 batch
+# equivalent to running `python run.py trainer.fast_dev_run=true`
+# (this is placed here just for easier access from command line)
+debug: False
+
+# pretty print config at the start of the run using Rich library
+print_config: True
+
+# disable python warnings if they annoy you
+ignore_warnings: True
+
+# check performance on test set, using the best model achieved during training
+# lightning chooses best model based on metric specified in checkpoint callback
+test_after_training: True
+
+seed: 12

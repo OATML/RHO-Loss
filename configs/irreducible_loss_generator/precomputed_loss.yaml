@@ -6,4 +6,4 @@
 #
 
 _target_: torch.load
-f: "/Users/jbrauner/repos/goldiprox-hydra/outputs/2021-09-09/15-25-00/checkpoints/irred_losses_and_checks.pt" #path to precomputed loss file
+f: "/Users/jbrauner/repos/goldiprox-hydra/outputs/pretrained_Resnet18/irred_losses_and_checks.pt" #path to precomputed loss file

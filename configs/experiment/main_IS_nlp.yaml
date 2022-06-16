@@ -1,0 +1,23 @@
+# @package _global_
+
+defaults:
+  - override /model: importance_sampling_model_nlp.yaml
+  - override /optimizer: adamw.yaml
+
+  
+model:
+  percent_train: 0.1
+
+trainer:
+  max_epochs: 100
+
+datamodule:
+  data_dir: "/scratch-ssd/oatml/data/"
+
+logger:
+  wandb:
+    project: "jb_nlp"
+  
+irreducible_loss_generator:
+  f: "xyz"
+

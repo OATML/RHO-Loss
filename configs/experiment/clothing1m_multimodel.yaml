@@ -14,18 +14,14 @@ defaults:
 # all parameters below will be merged with parameters from default configurations set above
 # this allows you to overwrite only specified parameters
 # Shared across all models.
-seed: 0
 
 trainer:
-  gpus: 1
   min_epochs: 50
   max_epochs: 50 #an epoch here is actually 0.1 of an epoch
 
 irreducible_loss_generator:
   # checkpoint_path: "/auto/users/muhzak/goldiprox-hydra/logs/runs/2021-11-12/14-40-28/checkpoints/epoch_008.ckpt" clean
-  # checkpoint_path: /auto/users/muhzak/goldiprox-hydra/clothing_multi/runs/2021-11-23/10-09-52/checkpoints/epoch_007.ckpt
-  # checkpoint_path: /auto/users/muhzak/goldiprox-hydra/clothing_multi/multiruns/2022-02-20_15-19-45/0/checkpoints/epoch_006.ckpt
-  checkpoint_path: /auto/users/muhzak/goldi_checkpoints/c1m_dirty.ckpt
+  checkpoint_path: /auto/users/muhzak/goldiprox-hydra/clothing_multi/runs/2021-11-23/10-09-52/checkpoints/epoch_007.ckpt
 
 datamodule:
   batch_size: 320
@@ -35,7 +31,7 @@ optimizer:
 
 logger:
   wandb:
-    project: "clothing1m-samedist"
+    project: "clothing1m_noisy"
     entity: "mtrazzak"
 
 eval_set: test

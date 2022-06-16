@@ -17,7 +17,6 @@ from pytorch_lightning import (
 from pytorch_lightning.loggers import LightningLoggerBase
 import torch
 import torch.nn as nn
-from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 
 from src.utils import utils
 from src.models.OneModel import OneModel
@@ -55,7 +54,7 @@ def train(config: DictConfig) -> Optional[float]:
             if "_target_" in cb_conf:
                 log.info(f"Instantiating callback <{cb_conf._target_}>")
                 callbacks.append(hydra.utils.instantiate(cb_conf))
-    callbacks.append(EarlyStopping(monitor="val_loss_epoch"))
+
     # Init lightning model
     if config.model.pretrained_proxy:
         log.info(

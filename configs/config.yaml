@@ -7,7 +7,7 @@ defaults:
   - model: multi_model.yaml
   - optimizer: adamw.yaml
   - trainer: default.yaml
-  - datamodule: cifar10_datamodule.yaml
+  - datamodule: qmnist_datamodule.yaml
   - selection_method: reducible_loss_selection.yaml
   - callbacks: default.yaml # set this to null if you don't want to use callbacks
   - logger: wandb.yaml # set logger here or use command line (e.g. `python run.py logger=wandb`)

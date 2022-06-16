@@ -1,14 +1,13 @@
 import torch
 import numpy as np
 from src.models.SVPModels import ForgettingEventsModel
-from tqdm import tqdm
+
 
 def get_coreset(selection_method, model, dataloader, percent_train):
     """
-    Returns sequence, which is np.array representing (len(dataset), )
+    Returns sequence, which is np.array representing (n_batches, batch_size)
     """
     model.eval()
-    model = model.to(torch.device('cuda:0'))
     dataset_size = len(dataloader.dataset)
     selected_dataset_size = int(dataset_size * percent_train)
 
@@ -30,12 +29,18 @@ def get_coreset(selection_method, model, dataloader, percent_train):
         preds = []
         global_indices = []
         with torch.inference_mode():
-            for batch_idx, (index, data, target) in enumerate(tqdm(dataloader)):
-                index = index.to(model.device)
-                data = data.to(model.device)
-                target = target.to(model.device)
+            for batch_idx, batch in enumerate(dataloader):
+                index = batch.pop("idx") # pop the "global index" from the batch dict
+                inputs = batch
+                target = inputs["labels"]
 
-                output = model(data).softmax(dim=1)
+                index, target = (
+                    index.to(model.device),
+                    # inputs.to(model.device),
+                    target.to(model.device),
+                )
+
+                output = (model(**inputs)[1]).softmax(dim=1)
                 preds.append(output.detach().cpu())
                 global_indices.append(index.detach().cpu())
 

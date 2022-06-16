@@ -2,9 +2,9 @@
 mode: "svp"
   
 defaults:
-  - override /model/proxy_model: pretrained
-  - override /model/large_model: imagenet_resnet50_pretrained
-  - override /datamodule: clothing1m_dirty_datamodule
+  - override /model/large_model: imagenet_resnet18
+  - override /model/proxy_model: imagenet_resnet18
+  - override /datamodule: clothing1m_datamodule
   - override /logger: wandb
   - override /optimizer: adamw
 
@@ -13,17 +13,13 @@ percent_train: 0.1
 selection_method: "entropy"
 eval_set: "test"
 base_outdir: logs
-
-model:
-  pretrained_proxy: True
-  proxy_model:
-      checkpoint_path: "/auto/users/muhzak/goldi_checkpoints/svp_dirtyc1m.ckpt"
-  
+model.pretrained_proxy: False
+pretrained_proxy: False
 
 datamodule:
   data_dir: '/scratch-ssd/oatml/data/clothing'
-  batch_size: 64
-  num_workers: 8
+  batch_size: 32
+  num_workers: 4
   pin_memory: True
 
 trainer:

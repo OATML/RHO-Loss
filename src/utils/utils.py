@@ -3,6 +3,7 @@ import os
 import warnings
 from typing import List, Sequence
 import subprocess
+import tqdm
 
 import pytorch_lightning as pl
 import rich.syntax
@@ -12,10 +13,7 @@ from omegaconf.omegaconf import open_dict
 from pytorch_lightning.utilities import rank_zero_only
 import torch
 import torch.nn as nn
-import numpy as np
-import tqdm
 
-from src.datamodules.clothing1m import Clothing1M
 
 def get_logger(name=__name__, level=logging.INFO) -> logging.Logger:
     """Initializes multi-GPU-friendly python logger."""
@@ -216,7 +214,7 @@ def unmask_config(config):
 ### and then reusing it across all main model runs
 
 
-def compute_losses_with_sanity_checks(dataloader, model, device=None):
+def compute_losses_with_sanity_checks(dataloader, model):
     """Compute losses for full dataset.
 
     (I did not implement this with
@@ -233,106 +231,146 @@ def compute_losses_with_sanity_checks(dataloader, model, device=None):
         the data points are indexed in the same order as they were in this
         function call, when <losses> is used.
     """
-    if isinstance(dataloader.dataset, Clothing1M):
-        if device is None:
-            device = model.device
-        else:
-            model.to(device)
-        print("Computing irreducible loss full training dataset.")
-        idx_of_control_images = [1, 3, 10, 30, 100, 300, 1000, 3000]
-        control_images = [0] * len(idx_of_control_images)
-        losses = torch.zeros(len(dataloader.dataset)).type(torch.FloatTensor)
-        targets = torch.zeros(len(dataloader.dataset)).type(torch.LongTensor)
-        prediction_correct = []
-        
-        with torch.inference_mode():
-            for idx, x, target in tqdm.tqdm(dataloader):
-                idx, x, target = idx, x.to(device), target.to(device)
-                logits = model(x)
-                loss = nn.functional.cross_entropy(logits, target, reduction="none")
-                losses[idx] = loss.cpu()
-                targets[idx] = target.cpu()
-                prediction_correct.append(torch.eq(torch.argmax(logits, dim=1), target).cpu())
 
-                for (id, image) in zip(idx, x):
-                    if id in idx_of_control_images:
-                        local_index = idx_of_control_images.index(id)
-                        control_images[local_index] = image.cpu()
+    print("Computing irreducible loss full training dataset.")
+    idx_of_control_images = [1, 3, 10, 30, 100, 300, 1000, 3000]
+    control_images = [0] * len(idx_of_control_images)
+    losses = []
+    idxs = []
+    targets = []
+    prediction_correct = []
 
-        acc = torch.cat(prediction_correct, dim=0)
-        acc = acc.type(torch.FloatTensor).mean()
-        average_loss = losses.mean()
+    with torch.inference_mode():
+        for idx, x, target in dataloader:
+            logits = model(x)
+            loss = nn.functional.cross_entropy(logits, target, reduction="none")
+            losses.append(loss)
+            idxs.append(idx)
+            targets.append(target)
+            prediction_correct.append(torch.eq(torch.argmax(logits, dim=1), target))
 
-        log.info(
-            f"Accuracy of irreducible loss model on train set (i.e. the train set of the target model, not the train set of the irreducible loss model) is {acc:.3f}\n"
-            f"Average loss of irreducible loss model on train set (i.e. the train set of the target model, not the train set of the irreducible loss model) is {average_loss:.3f}"
-        )
+            for (id, image) in zip(idx, x):
+                if id in idx_of_control_images:
+                    local_index = idx_of_control_images.index(id)
+                    control_images[local_index] = image
 
-        output = {
-            "irreducible_losses": losses,
-            "sorted_targets": targets,
-            "idx_of_control_images": idx_of_control_images,
-            "control_images": control_images,
-            "heldout_accuracy": acc,
-            "heldout_average_loss": average_loss,
-        }
+    acc = torch.cat(prediction_correct, dim=0)
+    acc = acc.type(torch.FloatTensor).mean()
+    average_loss = torch.cat(losses, dim=0).type(torch.FloatTensor).mean()
 
-        return output
+    log.info(
+        f"Accuracy of irreducible loss model on train set (i.e. the train set of the target model, not the train set of the irreducible loss model) is {acc:.3f}\n"
+        f"Average loss of irreducible loss model on train set (i.e. the train set of the target model, not the train set of the irreducible loss model) is {average_loss:.3f}"
+    )
+
+    losses_temp = torch.cat(losses, dim=0)
+    idxs = torch.cat(idxs, dim=0)
+    targets_temp = torch.cat(targets, dim=0)
+
+    max_idx = idxs.max()
+
+    losses = torch.tensor(
+        [float("nan")] * (max_idx + 1), dtype=losses_temp.dtype
+    )  # losses[global_index] is the irreducible loss of the datapoint with that global index. losses[idx] is nan if idx is not part of the dataset.
+    targets = torch.zeros(max_idx + 1, dtype=targets_temp.dtype)
+    losses[idxs] = losses_temp
+    targets[idxs] = targets_temp
+
+    output = {
+        "irreducible_losses": losses,
+        "sorted_targets": targets,
+        "idx_of_control_images": idx_of_control_images,
+        "control_images": control_images,
+        "heldout_accuracy": acc,
+        "heldout_average_loss": average_loss,
+    }
+
+    return output
+
+def compute_losses_with_sanity_checks_nlp(dataloader, model, device=None):
+    """Compute losses for full dataset.
+
+    (I did not implement this with
+    trainer.predict() because the trainset returns (index, x, y) and does not
+    readily fit into the forward method of the irreducible loss model.)
+
+    Returns:
+        losses: Tensor, losses for the full dataset, sorted by <globa_index> (as
+        returned from the train data loader). losses[global_index] is the
+        irreducible loss of the datapoint with that global index. losses[idx] is
+        nan if idx is not part of the dataset.
+        targets: Tensor, targets of the datsets, sorted by <index> (as
+        returned from the train data loader). Also see above.This is just used to verify that
+        the data points are indexed in the same order as they were in this
+        function call, when <losses> is used.
+    """
+
+    print("Computing irreducible loss full training dataset.")
+    idx_of_control_images = [1, 3, 10, 30, 100, 300, 1000, 3000]
+    control_images = [0] * len(idx_of_control_images)
+    losses = []
+    idxs = []
+    targets = []
+    prediction_correct = []
+
+    if device is None:
+        device = model.device
     else:
-        print("Computing irreducible loss full training dataset.")
-        idx_of_control_images = [1, 3, 10, 30, 100, 300, 1000, 3000]
-        control_images = [0] * len(idx_of_control_images)
-        losses = []
-        idxs = []
-        targets = []
-        prediction_correct = []
+        model.to(device)
 
-        with torch.inference_mode():
-            for idx, x, target in dataloader:
-                logits = model(x)
-                loss = nn.functional.cross_entropy(logits, target, reduction="none")
-                losses.append(loss)
-                idxs.append(idx)
-                targets.append(target)
-                prediction_correct.append(torch.eq(torch.argmax(logits, dim=1), target))
+    with torch.inference_mode():
+        for batch in tqdm.tqdm(dataloader):
+            idx = batch.pop("idx")
 
-                for (id, image) in zip(idx, x):
-                    if id in idx_of_control_images:
-                        local_index = idx_of_control_images.index(id)
-                        control_images[local_index] = image
+            inputs = batch#.to(device)
+            x = batch["input_ids"]
+            target = inputs["labels"]#.to(device)
 
-        acc = torch.cat(prediction_correct, dim=0)
-        acc = acc.type(torch.FloatTensor).mean()
-        average_loss = torch.cat(losses, dim=0).type(torch.FloatTensor).mean()
+            logits = model(**inputs)[1]
+            loss = nn.functional.cross_entropy(logits, target, reduction="none")
+            losses.append(loss)#.cpu())
+            idxs.append(idx)
+            targets.append(target)#.cpu())
+            prediction_correct.append(torch.eq(torch.argmax(logits, dim=1), target))
 
-        log.info(
-            f"Accuracy of irreducible loss model on train set (i.e. the train set of the target model, not the train set of the irreducible loss model) is {acc:.3f}\n"
-            f"Average loss of irreducible loss model on train set (i.e. the train set of the target model, not the train set of the irreducible loss model) is {average_loss:.3f}"
-        )
+            for (id, image) in zip(idx, x):
+                if id in idx_of_control_images:
+                    local_index = idx_of_control_images.index(id)
+                    control_images[local_index] = image
 
-        losses_temp = torch.cat(losses, dim=0)
-        idxs = torch.cat(idxs, dim=0)
-        targets_temp = torch.cat(targets, dim=0)
+    acc = torch.cat(prediction_correct, dim=0)
+    acc = acc.type(torch.FloatTensor).mean()
+    average_loss = torch.cat(losses, dim=0).type(torch.FloatTensor).mean()
 
-        max_idx = idxs.max()
+    log.info(
+        f"Accuracy of irreducible loss model on train set (i.e. the train set of the target model, not the train set of the irreducible loss model) is {acc:.3f}\n"
+        f"Average loss of irreducible loss model on train set (i.e. the train set of the target model, not the train set of the irreducible loss model) is {average_loss:.3f}"
+    )
 
-        losses = torch.tensor(
-            [float("nan")] * (max_idx + 1), dtype=losses_temp.dtype
-        )  # losses[global_index] is the irreducible loss of the datapoint with that global index. losses[idx] is nan if idx is not part of the dataset.
-        targets = torch.zeros(max_idx + 1, dtype=targets_temp.dtype)
-        losses[idxs] = losses_temp
-        targets[idxs] = targets_temp
+    losses_temp = torch.cat(losses, dim=0)
+    idxs = torch.cat(idxs, dim=0)
+    targets_temp = torch.cat(targets, dim=0)
 
-        output = {
-            "irreducible_losses": losses,
-            "sorted_targets": targets,
-            "idx_of_control_images": idx_of_control_images,
-            "control_images": control_images,
-            "heldout_accuracy": acc,
-            "heldout_average_loss": average_loss,
-        }
+    max_idx = idxs.max()
 
-        return output
+    losses = torch.tensor(
+        [float("nan")] * (max_idx + 1), dtype=losses_temp.dtype
+    )  # losses[global_index] is the irreducible loss of the datapoint with that global index. losses[idx] is nan if idx is not part of the dataset.
+    targets = torch.zeros(max_idx + 1, dtype=targets_temp.dtype)
+    losses[idxs] = losses_temp
+    targets[idxs] = targets_temp
+
+    output = {
+        "irreducible_losses": losses,
+        "sorted_targets": targets,
+        "idx_of_control_images": idx_of_control_images,
+        "control_images": control_images,
+        "heldout_accuracy": acc,
+        "heldout_average_loss": average_loss,
+    }
+
+    return output
+
 
 def verify_correct_dataset_order(
     dataloader,
@@ -359,29 +397,62 @@ def verify_correct_dataset_order(
     print(
         "Verifying that the dataset order is compatible with the order of the precomputed losses."
     )
-    if isinstance(dataloader.dataset, Clothing1M):
-        for idx in np.random.choice(range(len(dataloader.dataset)), 10000, replace=False):
-            _, _, target = dataloader.dataset[idx]
-            assert torch.equal(target, sorted_target[idx]), "Unequal Images. Order of dataloader is not consistent with order used when precomputing irreducible losses. Can't use precomputed losses. Either ask Jan, or use the irreducible loss model directly ('irreducible_loss-generator: irreducible_loss_model.yaml' in the config.). Note that the latter is probably slower."
-            
+
+    for idx, x, target in dataloader:
+        assert torch.equal(
+            target, sorted_target[idx]
+        ), "Unequal labels. Order of dataloader is not consistent with order used when precomputing irreducible losses. Can't use precomputed losses. Either ask Jan, or use the irreducible loss model directly ('irreducible_loss-generator: irreducible_loss_model.yaml' in the config.). Note that the latter is probably slower."
         if not dont_compare_control_images:
-            for i, idx in enumerate(idx_of_control_images):
-                _, image, _ = dataloader.dataset[idx]
-                assert torch.equal(image, control_images[i]), "Unequal Images. Order of dataloader is not consistent with order used when precomputing irreducible losses. Can't use precomputed losses. Either ask Jan, or use the irreducible loss model directly ('irreducible_loss-generator: irreducible_loss_model.yaml' in the config.). Note that the latter is probably slower."
-    else:
-        for idx, x, target in dataloader:
-            assert torch.equal(
-                target, sorted_target[idx]
-            ), "Unequal labels. Order of dataloader is not consistent with order used when precomputing irreducible losses. Can't use precomputed losses. Either ask Jan, or use the irreducible loss model directly ('irreducible_loss-generator: irreducible_loss_model.yaml' in the config.). Note that the latter is probably slower."
-            if not dont_compare_control_images:
-                for id, image in zip(idx, x):
-                    if id in idx_of_control_images:
-                        assert torch.equal(
-                            image, control_images[idx_of_control_images.index(id)]
-                        ), "Unequal Images. Order of dataloader is not consistent with order used when precomputing irreducible losses. Can't use precomputed losses. Either ask Jan, or use the irreducible loss model directly ('irreducible_loss-generator: irreducible_loss_model.yaml' in the config.). Note that the latter is probably slower."
+            for id, image in zip(idx, x):
+                if id in idx_of_control_images:
+                    assert torch.equal(
+                        image, control_images[idx_of_control_images.index(id)]
+                    ), "Unequal Images. Order of dataloader is not consistent with order used when precomputing irreducible losses. Can't use precomputed losses. Either ask Jan, or use the irreducible loss model directly ('irreducible_loss-generator: irreducible_loss_model.yaml' in the config.). Note that the latter is probably slower."
 
 
 
+def verify_correct_dataset_order_nlp(
+    dataloader,
+    sorted_target,
+    idx_of_control_images,
+    control_images,
+    dont_compare_control_images=False,
+):
+    """Roughly checks that a dataloader is sorted in the same order as the
+    precomputed losses. Concretely, does two checks: 1) that the labels used for
+    computing the irreducible losses are in the same order as those returned by
+    the dataloader. 2) That a handful of example images is identical across the
+    ones used for computing the irreducble loss and the ones returned by the
+    dataloader.
+
+    Args:
+        dataloader: a PyTorch dataloader, usually the training dataloader in our
+        current setting.
+        sorted_target, idx_of_control_images, control_images: those were saved
+        as controls when pre-computing the irreducible loss.
+        dont_compare_control_images: bool. Set to True if you don't want to compare
+        control images (required if there is trainset augmentation)
+    """
+    print(
+        "Verifying that the dataset order is compatible with the order of the precomputed losses."
+    )
+
+    for batch in dataloader:
+        idx = batch.pop("idx")
+
+        inputs = batch
+        x = batch["input_ids"]
+        target = inputs["labels"]
+
+        assert torch.equal(
+            target, sorted_target[idx]
+        ), "Unequal labels. Order of dataloader is not consistent with order used when precomputing irreducible losses. Can't use precomputed losses. Either ask Jan, or use the irreducible loss model directly ('irreducible_loss-generator: irreducible_loss_model.yaml' in the config.). Note that the latter is probably slower."
+        if not dont_compare_control_images:
+            for id, image in zip(idx, x):
+                if id in idx_of_control_images:
+                    assert torch.equal(
+                        image, control_images[idx_of_control_images.index(id)]
+                    ), "Unequal Images. Order of dataloader is not consistent with order used when precomputing irreducible losses. Can't use precomputed losses. Either ask Jan, or use the irreducible loss model directly ('irreducible_loss-generator: irreducible_loss_model.yaml' in the config.). Note that the latter is probably slower."
 
 
 

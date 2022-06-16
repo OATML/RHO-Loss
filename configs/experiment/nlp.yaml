@@ -1,0 +1,13 @@
+# @package _global_
+
+
+trainer:
+  max_epochs: 100
+
+datamodule:
+  data_dir: "/scratch-ssd/oatml/data/"
+  batch_size: 320
+
+logger:
+  wandb:
+    project: "jb_nlp"

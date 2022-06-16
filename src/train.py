@@ -108,6 +108,7 @@ def train(config: DictConfig) -> Optional[float]:
 
     # Init lightning trainer
     log.info(f"Instantiating trainer <{config.trainer._target_}>")
+    print("\nTraining on branch jan-dev\n")
     trainer: Trainer = hydra.utils.instantiate(
         config.trainer, callbacks=callbacks, logger=logger, _convert_="partial"
     )
@@ -126,8 +127,8 @@ def train(config: DictConfig) -> Optional[float]:
 
     # Train the model
     log.info("Starting training!")
-    log.info("\nTraining on main branch\n")
-    print("\nTraining on main branch\n")
+    log.info("Training on branch jan-dev")
+    print("Training on branch jan-dev")
     trainer.fit(
         pl_model,
         train_dataloaders=datamodule.train_dataloader(),

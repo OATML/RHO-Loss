@@ -9,7 +9,7 @@ import pytorch_lightning as pl
 
 # pytorch related imports
 import torch
-from torchmetrics.functional import accuracy
+from pytorch_lightning.metrics.functional import accuracy
 from torch import nn
 from torch.nn import functional as F
 import numpy as np
@@ -19,9 +19,7 @@ from src.models.OneModel import OneModel
 from src.utils.utils import unmask_config
 import hydra
 
-from src.datamodules.datamodules import CINIC10RelevanceDataModule, Clothing1MDataModule
-from src.curricula.selection_methods import reducible_loss_selection, irreducible_loss_selection, gradnorm_ub_selection, ce_loss_selection, uniform_selection
-import pdb
+from src.datamodules.datamodules import CINIC10RelevanceDataModule
 
 class MultiModels(pl.LightningModule):
     def __init__(
@@ -40,7 +38,6 @@ class MultiModels(pl.LightningModule):
         parallel_implementation=False,
         parallel_skip=False,
         selection_train_mode=True,
-        track_all_selection=False,
     ):
         """
         PyTorch Lightning Module for GoldiProx.
@@ -96,22 +93,6 @@ class MultiModels(pl.LightningModule):
         self.saved_batch = None
         self.current_batch = None
 
-        if track_all_selection:
-            self.all_selection_methods = [
-                reducible_loss_selection(),
-                gradnorm_ub_selection(),
-                ce_loss_selection(),
-                irreducible_loss_selection(),
-                uniform_selection()
-                ]
-            self.all_selection_method_names = [
-                "redloss",
-                "gradnorm",
-                "ce_loss",
-                "irred_loss",
-                "uniform"
-                ]
-
     def forward(self, x):
         x = self.large_model(x)
         return x
@@ -119,7 +100,7 @@ class MultiModels(pl.LightningModule):
     def training_step(self, batch, batch_idx):
         global_index, data, target = batch
         batch_size = len(data)
-        selected_batch_size = max(1, int(batch_size * self.hparams.percent_train))
+        selected_batch_size = int(batch_size * self.hparams.percent_train)
 
         if self.hparams.selection_train_mode:
             self.large_model.train()
@@ -151,29 +132,6 @@ class MultiModels(pl.LightningModule):
                 on_epoch=True,
                 logger=True,
             )
-
-        if isinstance(self.datamodule, Clothing1MDataModule) and self.hparams.track_all_selection:
-            for name, selection_method in zip(self.all_selection_method_names, self.all_selection_methods):
-                selected_indices_method, _, _ = selection_method(
-                    selected_batch_size=selected_batch_size,
-                    data=data,
-                    target=target,
-                    global_index=global_index,
-                    large_model=self.large_model,
-                    irreducible_loss_generator=self.irreducible_loss_generator,
-                    proxy_model=self.proxy_model,
-                    current_epoch=self.current_epoch,  # not used by all methods, but needed for annealing
-                    num_classes=self.datamodule.num_classes
-                    )
-                self.log(
-                    "percentage_clean_"+name,
-                    self.datamodule.percentage_clean(global_index[selected_indices_method]),
-                    on_step=True,
-                    on_epoch=True,
-                    logger=True,
-                )
-
-
 
         # build sequence
         self.sequence = np.append(

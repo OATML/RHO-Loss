@@ -1,0 +1,3 @@
+_target_: src.curricula.temperature_schedules.linear_schedule
+initial_temp: 1
+temp_increment: 2

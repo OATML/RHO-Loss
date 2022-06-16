@@ -10,20 +10,19 @@ defaults:
   - logger: wandb.yaml
   - hydra: default.yaml
   - _self_
-
 seed: 1
 
 datamodule:
+  data_dir: '/scratch-ssd/oatml/data'
+  batch_size: 320
+  num_workers: 4
+  pin_memory: True
   valset_data_aug: True # irreducible training: augment the validation set!
   # irreducible_train_val_test_split: True   # not used yet
 
 trainer:
-  _target_: pytorch_lightning.Trainer
-  gpus: 1
-  min_epochs: 30
-  max_epochs: 30
-
-  
+  progress_bar_refresh_rate: 20
+  val_check_interval: 1.
 
 
 # path to original working directory

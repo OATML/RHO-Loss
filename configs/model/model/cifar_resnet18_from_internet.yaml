@@ -1,0 +1,3 @@
+_target_: src.models.pretrained.resnets.resnet.resnet18
+pretrained: False
+progress: False

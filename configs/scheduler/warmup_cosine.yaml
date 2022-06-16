@@ -1,0 +1,3 @@
+_target_: "custom_hardcoded_warmup_cosine_lr" # this is super clumsy and dumb but I only need this once to train the irred loss model with the same hypers that I found on the internet and just want to be done with it 
+max_epochs: 100
+len_train_dataloader: 79

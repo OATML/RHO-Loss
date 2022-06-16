@@ -1,3 +1,0 @@
-_target_: src.models.modules.models.small_cnn_imagenet
-in_channels: 3
-num_classes: 14

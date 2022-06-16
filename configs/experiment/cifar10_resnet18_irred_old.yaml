@@ -1,0 +1,15 @@
+# @package _global_
+
+defaults:
+  - override /model/model: cifar_resnet.yaml
+  - override /datamodule: cifar10_datamodule.yaml
+
+trainer:
+  max_epochs: 100
+
+logger:
+  wandb:
+    project: "jan_playground"
+    # project: "JB_CIFAR10_improve_irred_loss_model"
+
+seed: 12

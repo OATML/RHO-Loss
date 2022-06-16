@@ -89,7 +89,7 @@ def train(config: DictConfig) -> Optional[float]:
     trainer.fit(
         pl_model,
         train_dataloaders=datamodule.val_dataloader(),
-        val_dataloaders=datamodule.test_dataloader(),
+        val_dataloaders=datamodule.train_dataloader(),
     )
 
     # Evaluate model on test set, using the best model achieved during training

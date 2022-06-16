@@ -1,3 +1,0 @@
-_target_: torchvision.models.googlenet
-num_classes: 14
-aux_logits: False

@@ -1,0 +1,4 @@
+_target_: src.datamodules.nlp_datamodules.GLUEDataModule
+task_name: cola
+shuffle: True
+no_test_set_avail: True

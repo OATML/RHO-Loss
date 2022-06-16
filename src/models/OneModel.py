@@ -10,7 +10,7 @@ import pytorch_lightning as pl
 
 # pytorch related imports
 import torch
-from torchmetrics.functional import accuracy
+from pytorch_lightning.metrics.functional import accuracy
 from torch import nn
 from torch.nn import functional as F
 
@@ -110,6 +110,17 @@ class OneModel(pl.LightningModule):
 
         if self.scheduler_config is None:
             return [optimizer]
+        elif self.scheduler_config.get("target")=="custom_hardcoded_warmup_cosine_lr": # this is super clumsy and dumb but I only need this once to train the irred loss model with the same hypers that I found on the internet and just want to be done with it 
+            from src.models.pretrained.resnets.schduler import WarmupCosineLR
+            total_steps = self.scheduler_config["max_epochs"] * self.scheduler_config["len_train_dataloader"]
+            scheduler = {
+                "scheduler": WarmupCosineLR(
+                    optimizer, warmup_epochs=total_steps * 0.3, max_epochs=total_steps
+                ),
+                "interval": "step",
+                "name": "learning_rate",
+            }
+            return [optimizer], [scheduler]
         else:
             scheduler = hydra.utils.instantiate(
                 unmask_config(self.scheduler_config),

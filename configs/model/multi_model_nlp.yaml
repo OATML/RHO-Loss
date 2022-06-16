@@ -1,0 +1,7 @@
+_target_: src.models.MultiModels_nlp.MultiModels
+percent_train: 0.1
+update_irreducible: False
+detailed_logging: False
+parallel_implementation: False
+parallel_skip: False
+weight_decay: 0.01

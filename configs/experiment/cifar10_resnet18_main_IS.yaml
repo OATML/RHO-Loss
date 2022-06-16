@@ -1,0 +1,26 @@
+# @package _global_
+
+defaults:
+  - override /model: importance_sampling_model.yaml
+  - override /model/model: cifar_resnet.yaml
+  - override /datamodule: cifar10_datamodule.yaml
+  - override /optimizer: adamw.yaml
+
+  
+model:
+  percent_train: 0.1
+
+trainer:
+  max_epochs: 100
+
+datamodule:
+  data_dir: "/scratch-ssd/oatml/data/"
+  batch_size: 320
+
+logger:
+  wandb:
+    project: "jb_cifar10"
+  
+irreducible_loss_generator:
+  f: "/users/janner/goldiprox-hydra/outputs/2021-09-29/16-55-44/checkpoints/irred_losses_and_checks_degraded_4.pt"
+

@@ -157,8 +157,3 @@ def resnet18_imagenet(pretrained=False, classes=10):
     model.maxpool = nn.Identity()
     model.fc = nn.Linear(512, classes, bias=True)
     return model
-
-def resnet50_imagenet(pretrained=False, classes=10):
-    model = torchvision.models.resnet50(pretrained=pretrained, num_classes=1000)
-    model.fc = nn.Linear(512, classes, bias=True)
-    return model

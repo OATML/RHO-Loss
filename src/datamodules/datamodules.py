@@ -232,7 +232,7 @@ class GoldiproxDatamodule(pl.LightningDataModule):
         trainset_data_aug=False,
         valset_data_aug=False,
         valset_fraction=1.0,
-        percent_clean=None,
+        trainsetsplit = True, #whether the trainset should be split into train set and holdout set (for IL model training). Only relevant for CIFAR10/100
     ):
         super().__init__()
         self.save_hyperparameters()
@@ -255,11 +255,12 @@ class GoldiproxDatamodule(pl.LightningDataModule):
         self.valset_data_aug = valset_data_aug
         self.shuffle = shuffle
         self.valset_fraction = valset_fraction
+        self.trainsetsplit = trainsetsplit
         # attributes needed for double irrlomo training
         self.indices_train_split_1 = None
         self.indices_train_split_2 = None
         self.indices_train_split_info = None
-        self.percent_clean = percent_clean
+
 
     def setup(self, stage=None, double_irlomo=False):
         # Assign train/val datasets for use in dataloaders
@@ -486,6 +487,36 @@ class QMNISTDataModule(GoldiproxDatamodule):
             self.data_dir, train=True, transform=self.transform
         )
 
+        ### the subsetting of the valset does not work right now. Throws some bug. But we probably don'T need it for MNIST anyway...
+        # valset_size = 50000
+        # val_subset = list(range(valset_size))
+
+        # # if only a part of the val subset should be used
+        # if self.valset_fraction < 1:
+        #     reduced_val_subset = []
+        #     temp_valset = indices_QMNIST(
+        #         self.data_dir,
+        #         "test50k",
+        #         download=True,
+        #         compat=True,
+        #         transform=self.transform,
+        #     )   
+        #     val_targets =temp_valset.targets
+        #     unique_targets = np.unique(val_targets).tolist()
+
+        #     # ensure even class balance for the split sets
+        #     for t in unique_targets:
+        #         target_indices = np.flatnonzero(train_targets == t).tolist()
+        #         reduced_val_subset.extend(target_indices[: int(len(target_indices) * self.valset_fraction)])
+ 
+        #     val_subset = reduced_val_subset.tolist()
+        # self.indices_val_factory = lambda: Subset(indices_QMNIST(
+        #     self.data_dir,
+        #     "test50k",
+        #     download=True,
+        #     compat=True,
+        #     transform=self.transform,
+        # ), val_subset)
         self.indices_val_factory = lambda: indices_QMNIST(
             self.data_dir,
             "test50k",
@@ -528,40 +559,75 @@ class CIFAR10DataModule(GoldiproxDatamodule):
             ]
         )
 
-        trainplusvalset_size = 50000
-        train_subset = list(range(0, trainplusvalset_size, 2))
-        val_subset = list(range(1, trainplusvalset_size, 2))
+        if self.trainsetsplit == True:
 
-        # if only a part of the val subset should be used
-        if self.valset_fraction < 1:
+            trainplusvalset_size = 50000
+            train_subset = list(range(0, trainplusvalset_size, 2))
+            val_subset = list(range(1, trainplusvalset_size, 2))
 
-            # all of this is only to make sure that the random subset is not very unbalanced
-            temp_train_and_valset = indices_CIFAR10(
-                self.data_dir,
-                train=True,
-                transform=self.transform
-                if not self.valset_data_aug
-                else self.data_augmented_transform,
-            )
+            # if only a part of the val subset should be used
+            if self.valset_fraction < 1:
 
-            targets = np.array(temp_train_and_valset.targets)
-            unique_targets = np.unique(targets).tolist()
-
-            reduced_val_subset = []
-            for t in unique_targets:
-                target_indices = np.flatnonzero(targets == t).tolist()
-                target_indices_in_valset = list(
-                    set(target_indices) & set(val_subset)
-                )  # take targets that are in the validation subset only
-                reduced_val_subset.extend(
-                    target_indices_in_valset[: int(len(target_indices_in_valset) * self.valset_fraction)]
+                # all of this is only to make sure that the random subset is not very unbalanced
+                temp_train_and_valset = indices_CIFAR10(
+                    self.data_dir,
+                    train=True,
+                    transform=self.transform
+                    if not self.valset_data_aug
+                    else self.data_augmented_transform,
                 )
 
-            val_subset = reduced_val_subset
+                targets = np.array(temp_train_and_valset.targets)
+                unique_targets = np.unique(targets).tolist()
 
-        log.info(f"Training set has {len(train_subset)} datapoints")
-        log.info(f"Validation set has {len(val_subset)} datapoints")
-        assert len(set(val_subset) & set(train_subset)) == 0  # ensure that the train and validation subset are disjoint
+                reduced_val_subset = []
+                for t in unique_targets:
+                    target_indices = np.flatnonzero(targets == t).tolist()
+                    target_indices_in_valset = list(
+                        set(target_indices) & set(val_subset)
+                    )  # take targets that are in the validation subset only
+                    reduced_val_subset.extend(
+                        target_indices_in_valset[: int(len(target_indices_in_valset) * self.valset_fraction)]
+                    )
+
+                val_subset = reduced_val_subset
+
+            log.info(f"Training set has {len(train_subset)} datapoints")
+            log.info(f"Validation set has {len(val_subset)} datapoints")
+            assert len(set(val_subset) & set(train_subset)) == 0  # ensure that the train and validation subset are disjoint
+        
+            self.indices_val_factory = lambda: Subset(
+                indices_CIFAR10(
+                    self.data_dir,
+                    train=True,
+                    transform=self.transform
+                    if not self.valset_data_aug
+                    else self.data_augmented_transform,
+                ),
+                val_subset,
+            )
+
+        elif self.trainsetsplit == False:
+            trainplusvalset_size = 50000
+            testsetsize = 10000
+            # train and valset will still be a subset, to have identical types as in the self.trainsetsplit == True branch
+            train_subset = list(range(0, trainplusvalset_size))
+            val_subset = list(range(0, testsetsize)) # now this is the subset wrt the test set
+
+            log.info(f"Training set has {len(train_subset)} datapoints")
+            log.info(f"Validation set has {len(val_subset)} datapoints")
+
+            # let the val set just be the CIFAR-10 testset, we won't use it anyway
+            self.indices_val_factory = lambda: Subset(
+                indices_CIFAR10(
+                    self.data_dir,
+                    train=False,
+                    transform=self.transform
+                    if not self.valset_data_aug
+                    else self.data_augmented_transform,
+                ),
+                val_subset,
+            )
 
         if self.sequence is None:
             # if no sequence is given use a subset of CIFAR for train/val
@@ -584,16 +650,6 @@ class CIFAR10DataModule(GoldiproxDatamodule):
                 sequence=self.sequence,
             )
 
-        self.indices_val_factory = lambda: Subset(
-            indices_CIFAR10(
-                self.data_dir,
-                train=True,
-                transform=self.transform
-                if not self.valset_data_aug
-                else self.data_augmented_transform,
-            ),
-            val_subset,
-        )
         self.indices_test_factory = lambda: indices_CIFAR10(
             self.data_dir, train=False, transform=self.transform
         )
@@ -679,40 +735,75 @@ class CIFAR100DataModule(GoldiproxDatamodule):
             ]
         )
 
-        trainplusvalset_size = 50000
-        train_subset = list(range(0, trainplusvalset_size, 2))
-        val_subset = list(range(1, trainplusvalset_size, 2))
+        if self.trainsetsplit == True:
 
-        # if only a part of the val subset should be used
-        if self.valset_fraction < 1:
-            # all of this is only to make sure that the random subset is not very unbalanced
-            temp_train_and_valset = indices_CIFAR100(
-                self.data_dir,
-                train=True,
-                transform=self.transform
-                if not self.valset_data_aug
-                else self.data_augmented_transform,
-            )
+            trainplusvalset_size = 50000
+            train_subset = list(range(0, trainplusvalset_size, 2))
+            val_subset = list(range(1, trainplusvalset_size, 2))
 
-            targets = np.array(temp_train_and_valset.targets)
-            unique_targets = np.unique(targets).tolist()
-
-            reduced_val_subset = []
-            for t in unique_targets:
-                target_indices = np.flatnonzero(targets == t).tolist()
-                target_indices_in_valset = list(
-                    set(target_indices) & set(val_subset)
-                )  # take targets that are in the validation subset only
-                reduced_val_subset.extend(
-                    target_indices_in_valset[: int(len(target_indices_in_valset) * self.valset_fraction)]
+            # if only a part of the val subset should be used
+            if self.valset_fraction < 1:
+                # all of this is only to make sure that the random subset is not very unbalanced
+                temp_train_and_valset = indices_CIFAR100(
+                    self.data_dir,
+                    train=True,
+                    transform=self.transform
+                    if not self.valset_data_aug
+                    else self.data_augmented_transform,
                 )
 
-            val_subset = reduced_val_subset
+                targets = np.array(temp_train_and_valset.targets)
+                unique_targets = np.unique(targets).tolist()
 
-        log.info(f"Training set has {len(train_subset)} datapoints")
-        log.info(f"Validation set has {len(val_subset)} datapoints")
-        assert len(set(val_subset) & set(train_subset)) == 0  # ensure that the train and validation subset are disjoint
+                reduced_val_subset = []
+                for t in unique_targets:
+                    target_indices = np.flatnonzero(targets == t).tolist()
+                    target_indices_in_valset = list(
+                        set(target_indices) & set(val_subset)
+                    )  # take targets that are in the validation subset only
+                    reduced_val_subset.extend(
+                        target_indices_in_valset[: int(len(target_indices_in_valset) * self.valset_fraction)]
+                    )
 
+                val_subset = reduced_val_subset
+
+            log.info(f"Training set has {len(train_subset)} datapoints")
+            log.info(f"Validation set has {len(val_subset)} datapoints")
+            assert len(set(val_subset) & set(train_subset)) == 0  # ensure that the train and validation subset are disjoint
+
+            self.indices_val_factory = lambda: Subset(
+                indices_CIFAR100(
+                    self.data_dir,
+                    train=True,
+                    transform=self.transform
+                    if not self.valset_data_aug
+                    else self.data_augmented_transform,
+                ),
+                val_subset,
+            )
+
+        elif self.trainsetsplit == False:
+            trainplusvalset_size = 50000
+            testsetsize = 10000
+            # train and valset will still be a subset, to have identical types as in the self.trainsetsplit == True branch
+            train_subset = list(range(0, trainplusvalset_size))
+            val_subset = list(range(0, testsetsize)) # now this is the subset wrt the test set
+
+            log.info(f"Training set has {len(train_subset)} datapoints")
+            log.info(f"Validation set has {len(val_subset)} datapoints")
+
+            # let the val set just be the CIFAR-100 testset, we won't use it anyway
+            self.indices_val_factory = lambda: Subset(
+                indices_CIFAR100(
+                    self.data_dir,
+                    train=False,
+                    transform=self.transform
+                    if not self.valset_data_aug
+                    else self.data_augmented_transform,
+                ),
+                val_subset,
+            )
+        
         if self.sequence is None:
             # if no sequence is given use a subset of CIFAR for train/val
             # otherwise use sequence given
@@ -734,16 +825,6 @@ class CIFAR100DataModule(GoldiproxDatamodule):
                 sequence=self.sequence,
             )
 
-        self.indices_val_factory = lambda: Subset(
-            indices_CIFAR100(
-                self.data_dir,
-                train=True,
-                transform=self.transform
-                if not self.valset_data_aug
-                else self.data_augmented_transform,
-            ),
-            val_subset,
-        )
         self.indices_test_factory = lambda: indices_CIFAR100(
             self.data_dir, train=False, transform=self.transform
         )
@@ -905,7 +986,7 @@ class Clothing1MDataModule(GoldiproxDatamodule):
         self.data_augmented_transform = transforms.Compose(
             [
                 transforms.Resize((256, 256)),
-                transforms.RandomCrop(224),
+                transforms.CenterCrop(224),
                 transforms.RandomHorizontalFlip(),
                 transforms.ToTensor(),
                 transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
@@ -915,7 +996,6 @@ class Clothing1MDataModule(GoldiproxDatamodule):
         self.indices_train_factory = lambda: Clothing1M(
             root=self.data_dir,
             mode="train",
-            percent_clean=self.percent_clean,
             transform=self.transform
             if not self.trainset_data_aug
             else self.data_augmented_transform,
@@ -937,15 +1017,6 @@ class Clothing1MDataModule(GoldiproxDatamodule):
             log.info("Trainset data augmentation turned on")
         if self.valset_data_aug:
             log.info("Valset data augmentation turned on")
-    
-    def percentage_clean(self, selected_global_indices, set="train"):
-        if set == "train":
-            clean_indicator = self.indices_train.indicate_clean(selected_global_indices)
-            return np.mean(clean_indicator)
-        elif set == "validation":
-            return self.indices_val.indicate_clean(selected_global_indices).mean()
-        elif set == "test":
-            return self.indices_test.indicate_clean(selected_global_indices).mean()
 
 
 class ImageNetDataModule(GoldiproxDatamodule):
@@ -1187,8 +1258,8 @@ class infiMNISTDataModule(GoldiproxDatamodule):
             )
 
 
-class DirtyClothing1MDataModule(GoldiproxDatamodule):
-    def __init__(self, val_size=100000, *args, **kwargs):
+class Clothing1MDataModule_dirty(GoldiproxDatamodule):
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.dims = (3, 224, 224)
         self.num_classes = 14
@@ -1200,7 +1271,6 @@ class DirtyClothing1MDataModule(GoldiproxDatamodule):
                 transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
             ]
         )
-        
         self.data_augmented_transform = transforms.Compose(
             [
                 transforms.Resize((256, 256)),
@@ -1210,92 +1280,29 @@ class DirtyClothing1MDataModule(GoldiproxDatamodule):
                 transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
             ]
         )
-
-        state = np.random.get_state()
         np.random.seed(0)
-        all_set = np.arange(1061883)
-        val_subset = np.random.choice(all_set, size=val_size, replace=False)
-        # train_subset = np.setdiff1d(all_set,val_subset)
-        np.random.set_state(state)
-        
+        val_subset = np.random.choice(1000000, size=50000, replace=False)
         self.indices_train_factory = lambda: Clothing1M(
             root=self.data_dir,
-            mode="dirty_train",
+            mode="train",
             transform=self.transform
             if not self.trainset_data_aug
             else self.data_augmented_transform,
         )
 
-        self.indices_val_factory = lambda: Subset(Clothing1M(
-            self.data_dir,
-            mode="dirty_train",
-            transform=self.transform
-            if not self.valset_data_aug
-            else self.data_augmented_transform,
-        ), val_subset)
+        self.indices_val_factory = lambda: Subset(
+            Clothing1M(
+                self.data_dir,
+                mode="train",
+                transform=self.transform
+                if not self.valset_data_aug
+                else self.data_augmented_transform,
+            ),
+            val_subset,
+        )
 
         self.indices_test_factory = lambda: Clothing1M(
-            self.data_dir,
-            mode="test",
-            transform=self.transform
-        )
-
-        if self.trainset_data_aug:
-            log.info("Trainset data augmentation turned on")
-        if self.valset_data_aug:
-            log.info("Valset data augmentation turned on")
-
-class NoisyOnlyClothing1MDataModule(GoldiproxDatamodule):
-    def __init__(self, val_size=100000, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.dims = (3, 224, 224)
-        self.num_classes = 14
-        self.transform = transforms.Compose(
-            [
-                transforms.Resize((256, 256)),
-                transforms.CenterCrop(224),
-                transforms.ToTensor(),
-                transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
-            ]
-        )
-        
-        self.data_augmented_transform = transforms.Compose(
-            [
-                transforms.Resize((256, 256)),
-                transforms.CenterCrop(224),
-                transforms.RandomHorizontalFlip(),
-                transforms.ToTensor(),
-                transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
-            ]
-        )
-
-        state = np.random.get_state()
-        np.random.seed(0)
-        all_set = np.arange(1061883)
-        val_subset = np.random.choice(all_set, size=val_size, replace=False)
-        train_subset = np.setdiff1d(all_set,val_subset)
-        np.random.set_state(state)
-        
-        self.indices_train_factory = lambda: Subset(Clothing1M(
-            root=self.data_dir,
-            mode="noisy_train",
-            transform=self.transform
-            if not self.trainset_data_aug
-            else self.data_augmented_transform,
-        ), train_subset)
-
-        self.indices_val_factory = lambda: Subset(Clothing1M(
-            self.data_dir,
-            mode="noisy_train",
-            transform=self.transform
-            if not self.valset_data_aug
-            else self.data_augmented_transform,
-        ), val_subset)
-
-        self.indices_test_factory = lambda: Clothing1M(
-            self.data_dir,
-            mode="test",
-            transform=self.transform
+            self.data_dir, mode="test", transform=self.transform
         )
 
         if self.trainset_data_aug:
