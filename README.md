@@ -52,3 +52,6 @@ Importance sampling on CINIC10
 ``` 
 python3 run_simple.py datamodule.data_dir=$DATA_DIR +experiment=importance_sampling_baseline.yaml 
 ```
+
+## Let us know how it goes!
+If you've tried RHO-LOSS and it worked well or not, or if you want us to give a presentation at your lab, we'd love to hear it! You can use the email at soren-mindermann.com.
