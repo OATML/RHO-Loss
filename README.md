@@ -93,4 +93,4 @@ If you find this code helpful for your work, please cite our paper
 ```
 
 ## Let us know how it goes!
-If you've tried RHO-LOSS and it worked well or not, or if you want us to give a presentation at your lab, we'd love to hear it! You can use the email at [www.soren-mindermann.com](https://www.soren-mindermann.com/).
+If you've tried RHO-LOSS and it worked well or not, or if you want us to give a presentation at your lab, we'd love to hear it! Correspondance to 'soren.mindermann at cs.ox.ac.uk'
